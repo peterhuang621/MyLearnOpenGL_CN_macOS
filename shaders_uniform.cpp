@@ -20,7 +20,13 @@ void processInput(GLFWwindow *window)
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
-const char *vertexShaderSource = "#version 330 core\nlayout(location=0) in vec3 aPos;\nlayout(location=1) in vec3 aColor;\nout vec3 ourColor;\nvoid main()\n{gl_Position=vec4(aPos,1.0);ourColor=aColor;\n}\0";
+// exercise 1
+// const char *vertexShaderSource = "#version 330 core\n"
+//                                  "layout(location=0) in vec3 aPos;\n"
+//                                  "layout(location=1) in vec3 aColor;\n"
+//                                  "out vec3 ourColor;\n"
+//                                  "void main()\n"
+//                                  "{gl_Position=vec4(aPos.x,-aPos.y,aPos.z,1.0);\nourColor=aColor;\n}\0";
 
 // exercise 2
 // const char *vertexShaderSource = "#version 330 core\n"
@@ -29,9 +35,29 @@ const char *vertexShaderSource = "#version 330 core\nlayout(location=0) in vec3 
 //                                  "uniform float delta;\n"
 //                                  "void main()\n{gl_Position=vec4(aPos.x+delta,aPos.yz,1.0);\nourColor=aColor;\n}\0";
 
-// exercise 1
-//  "layout(location=1) in vec3 aColor;\nout vec3 ourColor;\nvoid main()\n{gl_Position=vec4(aPos.x,-aPos.y,aPos.z,1.0);\nourColor=aColor;\n}\0";
-const char *fragmentShaderSource = "#version 330 core\nout vec4 FragColor;\nin vec3 ourColor;\nvoid main()\n{FragColor=vec4(ourColor,1.0);\n}\0";
+// exercise 3
+// const char *vertexShaderSource = "#version 330 core\n"
+//                                  "layout(location=0) in vec3 aPos;\n"
+//                                  "out vec3 outPos;\n"
+//                                  "void main()\n"
+//                                  "{gl_Position=vec4(aPos,1.0);outPos=aPos;\n}\0";
+// const char *fragmentShaderSource = "#version 330 core\n"
+//                                    "out vec4 FragColor;\n"
+//                                    "in vec3 outPos;\n"
+//                                    "void main()\n"
+//                                    "{FragColor=vec4(outPos,1.0);\n}\0";
+
+const char *vertexShaderSource = "#version 330 core\n"
+                                 "layout(location=0) in vec3 aPos;\n"
+                                 "layout(location=1) in vec3 aColor;\n"
+                                 "out vec3 ourColor;\n"
+                                 "void main()\n"
+                                 "{gl_Position=vec4(aPos,1.0);ourColor=aColor;\n}\0";
+const char *fragmentShaderSource = "#version 330 core\n"
+                                   "out vec4 FragColor;\n"
+                                   "in vec3 ourColor;\n"
+                                   "void main()\n"
+                                   "{FragColor=vec4(ourColor,1.0);\n}\0";
 
 int main(int argc, char const *argv[])
 {
