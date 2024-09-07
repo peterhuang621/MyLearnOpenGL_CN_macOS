@@ -1,0 +1,6 @@
+add_executable(test test.cpp)
+add_executable(firstwindow firstwindow.cpp)
+add_executable(hello_triangles hello_triangles.cpp)
+add_executable(hello_triangles_indes hello_triangles_index.cpp)
+add_executable(shader_uniform shaders_uniform.cpp)
+add_executable(texture textures.cpp)
