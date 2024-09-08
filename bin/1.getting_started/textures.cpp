@@ -71,7 +71,7 @@ int main(int argc, char const *argv[])
 
     int width, height, nrChannels;
     stbi_set_flip_vertically_on_load(true);
-    unsigned char *data = stbi_load("/Users/peterhuang98/test_code/C++/learn_opengl/resources/textures/container.jpg", &width, &height, &nrChannels, 0);
+    unsigned char *data = stbi_load("../../resources/textures/container.jpg", &width, &height, &nrChannels, 0);
     if (data)
     {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -89,7 +89,7 @@ int main(int argc, char const *argv[])
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    data = stbi_load("/Users/peterhuang98/test_code/C++/learn_opengl/resources/textures/awesomeface.png", &width, &height, &nrChannels, 0);
+    data = stbi_load("../../resources/textures/awesomeface.png", &width, &height, &nrChannels, 0);
     if (data)
     {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -112,7 +112,7 @@ int main(int argc, char const *argv[])
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glActiveTexture(GL_TEXTURE);
+        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture1);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
@@ -120,7 +120,6 @@ int main(int argc, char const *argv[])
         ourShader.use();
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
