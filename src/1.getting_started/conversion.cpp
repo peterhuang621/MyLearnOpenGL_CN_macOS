@@ -1,7 +1,7 @@
 #include <iostream>
-#include <shader.h>
+#include "shader.h"
 #include <GLFW/glfw3.h>
-#include <stb_image.h>
+#include "stb_image.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -43,7 +43,7 @@ int main(int argc, char const *argv[])
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    Shader ourshader("/Users/peterhuang98/test_code/C++/learn_opengl/src/1.getting_started/5.1.transform.vs", "/Users/peterhuang98/test_code/C++/learn_opengl/src/1.getting_started/5.1.transform.fs");
+    Shader ourShader("/Users/peterhuang98/test_code/C++/learn_opengl/src/1.getting_started/5.1.transform.vs", "/Users/peterhuang98/test_code/C++/learn_opengl/src/1.getting_started/5.1.transform.fs");
 
     float vertices[] = {
         0.5f, 0.5f, 0.0f, 1.0f, 1.0f,
@@ -70,17 +70,90 @@ int main(int argc, char const *argv[])
     unsigned int texture1, texture2;
     glGenTextures(1, &texture1);
     glBindTexture(GL_TEXTURE_2D, texture1);
-    // unsigned int transformLoc = glgetuniform(ourshader.ID);
-    // glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f);
-    // glm::mat4 trans = glm::mat4(1.0f);
-    // // trans = glm::translate(trans , glm::vec3(1.0f , 1.0f , 0.0f));
-    // // vec = trans * vec;
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    // trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
+    int width, height, nrChannels;
+    stbi_set_flip_vertically_on_load_thread(true);
+    unsigned char *data = stbi_load("/Users/peterhuang98/test_code/C++/learn_opengl/resources/textures/container.jpg", &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        // std::cout << "Width: " << width << ", Height: " << height << ", Channels: " << nrChannels << std::endl;
+        // for (int i = 0; i < 8; i++)
+        // {
+        //     cout << int(data[i]) << ' ';
+        // }
+        // cout << endl;
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        cout << "Failed to load texture\n";
+    }
+    stbi_image_free(data);
 
-    // trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
-    // vec = trans * vec;
-    // cout << vec.x << ' ' << vec.y << ' ' << vec.z << endl;
+    glGenTextures(1, &texture2);
+    glBindTexture(GL_TEXTURE_2D, texture2);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    data = stbi_load("/Users/peterhuang98/test_code/C++/learn_opengl/resources/textures/awesomeface.png", &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        // std::cout << "Width: " << width << ", Height: " << height << ", Channels: " << nrChannels << std::endl;
+        // for (int i = 0; i < 8; i++)
+        // {
+        //     cout << int(data[i]) << ' ';
+        // }
+        // cout << endl;
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        cout << "Failed to load texture\n";
+    }
+    stbi_image_free(data);
+
+    ourShader.use();
+    ourShader.setInt("texture1", 0);
+    ourShader.setInt("texture2", 1);
+
+    while (!glfwWindowShouldClose(window))
+    {
+        processInput(window);
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, texture2);
+
+        glm::mat4 transform = glm::mat4(1.0f);
+        transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
+        transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+
+        ourShader.use();
+        unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+
+    glfwTerminate();
 
     return 0;
 }

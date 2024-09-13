@@ -1,4 +1,5 @@
 #include "shader.h"
+#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include <GLFW/glfw3.h>
 const unsigned int SCR_WIDTH = 800;
@@ -83,7 +84,7 @@ int main(int argc, char const *argv[])
     }
     stbi_image_free(data);
 
-    glGenBuffers(1, &texture2);
+    glGenTextures(1, &texture2);
     glBindTexture(GL_TEXTURE_2D, texture2);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -92,7 +93,7 @@ int main(int argc, char const *argv[])
     data = stbi_load("/Users/peterhuang98/test_code/C++/learn_opengl/resources/textures/awesomeface.png", &width, &height, &nrChannels, 0);
     if (data)
     {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else
