@@ -121,8 +121,8 @@ int main(int argc, char const *argv[])
     stbi_image_free(data);
 
     ourShader.use();
-    ourShader.setInt("texture1", 0);
-    ourShader.setInt("texture2", 1);
+    ourShader.setInt("texture1", 1);
+    ourShader.setInt("texture2", 2);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -130,12 +130,21 @@ int main(int argc, char const *argv[])
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture1);
         glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, texture1);
+        glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, texture2);
 
         glm::mat4 transform = glm::mat4(1.0f);
+        // exercise 1
+        // transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+        // transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
+
+        // exercise 2
+        // transform = glm::translate(transform, glm::vec3(-0.5f, 0.5f, 0.0f));
+        // float scaleFactor = (float)abs(sin(glfwGetTime()));
+        // transform = glm::scale(transform, glm::vec3(scaleFactor, scaleFactor, scaleFactor));
+
         transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
         transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
 
