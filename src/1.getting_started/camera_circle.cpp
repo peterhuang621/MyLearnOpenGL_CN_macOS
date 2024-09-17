@@ -7,6 +7,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
     glViewport(0, 0, width, height);
@@ -14,6 +20,23 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 
 void processInput(GLFWwindow *window)
 {
+    float cameraSpeed = 2.5f * deltaTime;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    {
+        cameraPos += cameraSpeed * cameraFront;
+    }
+    else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    {
+        cameraPos -= cameraSpeed * cameraFront;
+    }
+    else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    {
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    }
+    else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    {
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    }
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
         glfwSetWindowShouldClose(window, true);
@@ -99,7 +122,7 @@ int main(int argc, char const *argv[])
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     glEnable(GL_DEPTH_TEST);
-    Shader ourShader("/Users/peterhuang98/test_code/C++/learn_opengl/src/1.getting_started/6.1.coordinate_systems.vs", "/Users/peterhuang98/test_code/C++/learn_opengl/src/1.getting_started/6.1.coordinate_systems.fs");
+    Shader ourShader("/Users/peterhuang98/test_code/C++/learn_opengl/src/1.getting_started/7.1.camera.vs", "/Users/peterhuang98/test_code/C++/learn_opengl/src/1.getting_started/7.1.camera.fs");
 
     unsigned int VAO, VBO;
     glGenVertexArrays(1, &VAO);
@@ -130,7 +153,7 @@ int main(int argc, char const *argv[])
     }
     else
     {
-        std::cout << "Failed to load texture" << std::endl;
+        cout << "Failed to load texture" << endl;
     }
     stbi_image_free(data);
 
@@ -148,16 +171,21 @@ int main(int argc, char const *argv[])
     }
     else
     {
-        std::cout << "Failed to load texture" << std::endl;
+        cout << "Failed to load texture" << endl;
     }
     stbi_image_free(data);
 
     ourShader.use();
     ourShader.setInt("texture1", 0);
     ourShader.setInt("texture2", 1);
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+    ourShader.setMat4("projection", projection);
 
     while (!glfwWindowShouldClose(window))
     {
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
         processInput(window);
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -169,40 +197,26 @@ int main(int argc, char const *argv[])
         glBindTexture(GL_TEXTURE_2D, texture2);
 
         ourShader.use();
+        //  Rotating the view...
+        // glm::mat4 view(1.0f);
+        // float radius = 10.0f;
+        // float camX = static_cast<float>(sin(glfwGetTime()) * radius);
+        // float camZ = static_cast<float>(cos(glfwGetTime()) * radius);
+        // view = glm::lookAt(glm::vec3(camX, 0.0f, camZ), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        // ourShader.setMat4("view", view);
+
+        // camera/view tranformation
+        glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        ourShader.setMat4("view", view);
 
         glBindVertexArray(VAO);
-        glm::mat4 model = glm::mat4(1.0f);
-        glm::mat4 view = glm::mat4(1.0f);
-        glm::mat4 projection = glm::mat4(1.0f);
-        model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-        projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-
-        unsigned int modelLoc = glGetUniformLocation(ourShader.ID, "model");
-        unsigned int viewLoc = glGetUniformLocation(ourShader.ID, "view");
-
-        // uni val 1
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
-        // uni val 2
-        // glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &model[0][0]);
-        // glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
-        // uni val 3
-        // ourShader.setMat4("model", model);
-        // ourShader.setMat4("view", view);
-        ourShader.setMat4("projection", projection);
-        // glDrawArrays(GL_TRIANGLES, 0, 36);
-
-        // Ten rotating cubes...
         for (int i = 0; i < 10; i++)
         {
-            glm::mat4 extra_model(1.0f);
-            extra_model = glm::translate(extra_model, cubePositions[i]);
-            float angle = 20.0f * glfwGetTime() * (i + 1);
-            // exercise
-            // float angle = 20.0f * glfwGetTime() * ((i % 3) == 0);
-            extra_model = glm::rotate(extra_model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            ourShader.setMat4("model", extra_model);
+            glm::mat4 model(1.0f);
+            model = glm::translate(model, cubePositions[i]);
+            float angle = 20.0f * i;
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            ourShader.setMat4("model", model);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 

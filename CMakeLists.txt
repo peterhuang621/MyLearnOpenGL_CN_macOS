@@ -18,14 +18,15 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 include_directories(${CMAKE_SOURCE_DIR}/includes)
 
 # for APPLE
-include_directories(/System/Library/Frameworks)
+include_directories(/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks)
 FIND_LIBRARY(COCOA_LIBRARY Cocoa)
 FIND_LIBRARY(OpenGL_LIBRARY OpenGL)
 FIND_LIBRARY(IOKit_LIBRARY IOKit)
 FIND_LIBRARY(CoreVideo_LIBRARY CoreVideo)
 MARK_AS_ADVANCED(COCOA_LIBRARY OpenGL_LIBRARY)
 SET(APPLE_LIBS ${COCOA_LIBRARY} ${IOKit_LIBRARY} ${OpenGL_LIBRARY} ${CoreVideo_LIBRARY})
-SET(APPLE_LIBS ${APPLE_LIBS} ${GLFW3_LIBRARY} ${ASSIMP_LIBRARY} ${FREETYPE_LIBRARIES})
+
+# SET(APPLE_LIBS ${APPLE_LIBS} ${GLFW3_LIBRARY} ${ASSIMP_LIBRARY} ${FREETYPE_LIBRARIES})
 set(ALL_LIBS ${ALL_LIBS} ${APPLE_LIBS})
 include_directories(/opt/homebrew/include)
 
