@@ -5,7 +5,7 @@ project("MyLearnOpenGL")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
-set(CMAKE_CXX_FLAGS "-Wno-deprecated-declarations -Wno-unused-command-line-argument -lglfw -framework OpenGL")
+set(CMAKE_CXX_FLAGS "-Wno-deprecated-declarations -Wno-unused-command-line-argument -Wno-cpp -lglfw -framework OpenGL")
 
 # set(CMAKE_VERBOSE_MAKEFILE ON)
 
