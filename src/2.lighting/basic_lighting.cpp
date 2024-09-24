@@ -137,7 +137,9 @@ int main(int argc, char const *argv[])
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-
+        // exercise 1
+        // lightPos.x = 1.0f + sin(glfwGetTime()) * 2.0f;
+        // lightPos.y = sin(glfwGetTime() / 2.0f) * 1.0f;
         processInput(window);
 
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -155,6 +157,7 @@ int main(int argc, char const *argv[])
         lightingShader.setMat4("view", view);
         lightingShader.setMat4("model", model);
         lightingShader.setVec3("lightPos", lightPos);
+        lightingShader.setVec3("viewPos", camera.Position);
 
         glBindVertexArray(cubeVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -164,7 +167,7 @@ int main(int argc, char const *argv[])
         lightCubeShader.setMat4("view", view);
         model = glm::mat4(1.0f);
         model = glm::translate(model, lightPos);
-        model = glm::scale(model, glm::vec3(0.2f));
+        model = glm::scale(model, glm::vec3(0.1f));
         lightCubeShader.setMat4("model", model);
 
         glBindVertexArray(lightCubeVAO);
