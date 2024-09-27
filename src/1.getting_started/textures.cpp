@@ -38,13 +38,12 @@ int main(int argc, char const *argv[])
     glfwMakeContextCurrent(window);
     glfwSetWindowPosCallback(window, framebuffer_size_callback);
 
-    Shader ourShader("/Users/peterhuang98/test_code/C++/learn_opengl/src/1.getting_started/4.2.texture.vs", "/Users/peterhuang98/test_code/C++/learn_opengl/src/1.getting_started/4.2.texture.fs");
-    float vertices[] = {0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-                        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-                        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-                        -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f};
-    unsigned int indices[] = {0, 1, 3,
-                              1, 2, 3};
+    Shader ourShader("/Users/peterhuang98/test_code/C++/learn_opengl/src/1.getting_started/4.2.texture.vs",
+                     "/Users/peterhuang98/test_code/C++/learn_opengl/src/1.getting_started/4.2.texture.fs");
+    float vertices[] = {0.5f, 0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f,  1.0f, 0.5f, -0.5f, 0.0f,
+                        0.0f, 1.0f, 0.0f,  1.0f, 0.0f, -0.5f, -0.5f, 0.0f, 0.0f, 0.0f,  1.0f,
+                        0.0f, 0.0f, -0.5f, 0.5f, 0.0f, 1.0f,  1.0f,  0.0f, 0.0f, 1.0f};
+    unsigned int indices[] = {0, 1, 3, 1, 2, 3};
     unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -72,7 +71,8 @@ int main(int argc, char const *argv[])
 
     int width, height, nrChannels;
     stbi_set_flip_vertically_on_load(true);
-    unsigned char *data = stbi_load("/Users/peterhuang98/test_code/C++/learn_opengl/resources/textures/container.jpg", &width, &height, &nrChannels, 0);
+    unsigned char *data = stbi_load("/Users/peterhuang98/test_code/C++/learn_opengl/resources/textures/container.jpg",
+                                    &width, &height, &nrChannels, 0);
     if (data)
     {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -90,7 +90,8 @@ int main(int argc, char const *argv[])
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    data = stbi_load("/Users/peterhuang98/test_code/C++/learn_opengl/resources/textures/awesomeface.png", &width, &height, &nrChannels, 0);
+    data = stbi_load("/Users/peterhuang98/test_code/C++/learn_opengl/resources/textures/awesomeface.png", &width,
+                     &height, &nrChannels, 0);
     if (data)
     {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);

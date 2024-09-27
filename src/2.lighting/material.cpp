@@ -82,8 +82,6 @@ void processInput(GLFWwindow *window)
         camera.ProcessKeyboard(RIGHT, deltaTime);
 }
 
-const char *dat = "cyan plastic	0.0	0.1	0.06	0.0	0.50980392	0.50980392	0.50196078	0.50196078	0.50196078	.25";
-
 int main(int argc, char const *argv[])
 {
     glfwInit();
