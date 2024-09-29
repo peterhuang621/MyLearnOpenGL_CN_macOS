@@ -15,7 +15,7 @@ bool firstMouse = true;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+glm::vec3 lightPos(0.8f, 0.8f, 1.7f);
 float vertices[] = {
     -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f, 0.0f, 0.5f,  -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 1.0f, 0.0f,
     0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 1.0f, 1.0f, 0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 1.0f, 1.0f,
@@ -181,9 +181,20 @@ int main(int argc, char const *argv[])
 
     unsigned int diffuseMap =
         loadTexture("/Users/peterhuang98/test_code/C++/learn_opengl/resources/textures/container2.png");
+    unsigned int specularMap =
+        loadTexture("/Users/peterhuang98/test_code/C++/learn_opengl/resources/textures/container2_specular.png");
+    // exercise 3
+    // unsigned int specularMap = loadTexture(
+    //     "/Users/peterhuang98/test_code/C++/learn_opengl/resources/textures/lighting_maps_specular_color.png");
+    // exercise 4
+    unsigned int emissionMap =
+        loadTexture("/Users/peterhuang98/test_code/C++/learn_opengl/resources/textures/matrix.jpg");
 
     lightingShader.use();
     lightingShader.setInt("material.diffuse", 0);
+    lightingShader.setInt("material.specular", 1);
+    // exercise 4
+    lightingShader.setInt("material.emission", 2);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -201,9 +212,14 @@ int main(int argc, char const *argv[])
 
         lightingShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
         lightingShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+        // lightingShader.setInt("light.specular", 1);
         lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
-        lightingShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
+
+        // lightingShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
         lightingShader.setFloat("material.shininess", 64.0f);
+        // exercise 4
+        // lightingShader.setFloat("matrixmove", currentFrame);
+        // lightingShader.setVec3("matrixlight", glm::vec3(abs(sin(currentFrame / 2))));
 
         glm::mat4 projection =
             glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -211,10 +227,19 @@ int main(int argc, char const *argv[])
         lightingShader.setMat4("projection", projection);
         lightingShader.setMat4("view", view);
         glm::mat4 model = glm::mat4(1.0f);
+        // exercise 4
+        // model = glm::rotate(glm::mat4(1.0f), glm::radians(currentFrame / 2 * 45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
         lightingShader.setMat4("model", model);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, diffuseMap);
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, specularMap);
+
+        // exercise 4
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, emissionMap);
 
         glBindVertexArray(cubeVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
