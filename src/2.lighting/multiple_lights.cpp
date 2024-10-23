@@ -201,7 +201,9 @@ int main(int argc, char const *argv[])
         lastFrame = currentFrame;
         processInput(window);
 
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        // glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        // exercise 1
+        glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         lightingShader.use();
@@ -230,8 +232,11 @@ int main(int argc, char const *argv[])
         lightingShader.setFloat("pointLights[1].quadratic", 0.032f);
 
         lightingShader.setVec3("pointLights[2].position", pointLightPositions[2]);
-        lightingShader.setVec3("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
-        lightingShader.setVec3("pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
+        // lightingShader.setVec3("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
+        // lightingShader.setVec3("pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
+        // exercise 1
+        lightingShader.setVec3("pointLights[2].ambient", 0.05f, 0.2f, 0.05f);
+        lightingShader.setVec3("pointLights[2].diffuse", 0.2f, 0.8f, 0.2f);
         lightingShader.setVec3("pointLights[2].specular", 1.0f, 1.0f, 1.0f);
         lightingShader.setFloat("pointLights[2].constant", 1.0f);
         lightingShader.setFloat("pointLights[2].linear", 0.09f);
@@ -247,9 +252,13 @@ int main(int argc, char const *argv[])
 
         lightingShader.setVec3("spotLight.position", camera.Position);
         lightingShader.setVec3("spotLight.direction", camera.Front);
-        lightingShader.setVec3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
-        lightingShader.setVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
-        lightingShader.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
+        // lightingShader.setVec3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
+        // lightingShader.setVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
+        // lightingShader.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
+        // exercise 1
+        lightingShader.setVec3("spotLight.ambient", 0.0f, 0.5f, 0.0f);
+        lightingShader.setVec3("spotLight.diffuse", 0.0f, 1.0f, 0.0f);
+        lightingShader.setVec3("spotLight.specular", 0.0f, 0.4f, 0.0f);
         lightingShader.setFloat("spotLight.constant", 1.0f);
         lightingShader.setFloat("spotLight.linear", 0.09f);
         lightingShader.setFloat("spotLight.quadratic", 0.032f);
