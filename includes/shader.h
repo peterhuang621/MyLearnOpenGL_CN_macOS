@@ -1,19 +1,19 @@
 #ifndef SHADER_H
 #define SHADER_H
 
-#include <glm/glm.hpp>
 #include <OpenGL/gl3.h>
+#include <fstream>
+#include <glm/glm.hpp>
 #include <iostream>
-#include <fstream>
 #include <sstream>
-#include <fstream>
 using namespace std;
 
 class Shader
 {
-public:
+  public:
     unsigned int ID;
     Shader(const char *vertexPath, const char *fragmentPath);
+    Shader(const string vertexPath, const string fragmentPath);
     void use();
     void setBool(const string &name, bool value) const;
     void setInt(const string &name, int value) const;
@@ -28,7 +28,7 @@ public:
     void setMat3(const std::string &name, const glm::mat3 &mat) const;
     void setMat4(const std::string &name, const glm::mat4 &mat) const;
 
-private:
+  private:
     void checkCompileErrors(unsigned int shader, string type);
 };
 
