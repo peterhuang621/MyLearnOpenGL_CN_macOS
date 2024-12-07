@@ -23,9 +23,8 @@ FIND_LIBRARY(COCOA_LIBRARY Cocoa)
 FIND_LIBRARY(OpenGL_LIBRARY OpenGL)
 FIND_LIBRARY(IOKit_LIBRARY IOKit)
 FIND_LIBRARY(CoreVideo_LIBRARY CoreVideo)
-find_package(ASSIMP REQUIRED)
 MARK_AS_ADVANCED(COCOA_LIBRARY OpenGL_LIBRARY)
-SET(APPLE_LIBS ${COCOA_LIBRARY} ${IOKit_LIBRARY} ${OpenGL_LIBRARY} ${CoreVideo_LIBRARY} ${ASSIMP_LIBRARY})
+SET(APPLE_LIBS ${COCOA_LIBRARY} ${IOKit_LIBRARY} ${OpenGL_LIBRARY} ${CoreVideo_LIBRARY})
 
 # SET(APPLE_LIBS ${APPLE_LIBS} ${GLFW3_LIBRARY} ${ASSIMP_LIBRARY} ${FREETYPE_LIBRARIES})
 set(ALL_LIBS ${ALL_LIBS} ${APPLE_LIBS})
@@ -37,8 +36,8 @@ set(ALL_LIBS ${ALL_LIBS} "src/stb_image.cpp")
 add_library(LIBS STATIC ${ALL_LIBS})
 link_libraries(LIBS)
 link_directories(${CMAKE_SOURCE_DIR}/lib)
-link_directories(/opt/homebrew/lib)
 
+link_directories(/opt/homebrew/lib)
 set(CHAPTERS
     1.getting_started
     2.lighting
