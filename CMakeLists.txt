@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 set(CMAKE_CXX_FLAGS "-Wno-deprecated-declarations -Wno-unused-command-line-argument -Wno-cpp -lglfw -framework OpenGL")
+set(CMAKE_PREFIX_PATH "/opt/homebrew")
 
 # set(CMAKE_VERBOSE_MAKEFILE ON)
 
@@ -16,6 +17,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # include headers
 include_directories(${CMAKE_SOURCE_DIR}/includes)
+include_directories(/opt/homebrew/include)
 
 # for APPLE
 include_directories(/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks)
@@ -28,16 +30,17 @@ SET(APPLE_LIBS ${COCOA_LIBRARY} ${IOKit_LIBRARY} ${OpenGL_LIBRARY} ${CoreVideo_L
 
 # SET(APPLE_LIBS ${APPLE_LIBS} ${GLFW3_LIBRARY} ${ASSIMP_LIBRARY} ${FREETYPE_LIBRARIES})
 set(ALL_LIBS ${ALL_LIBS} ${APPLE_LIBS})
-include_directories(/opt/homebrew/include)
 
 # load libs
 set(ALL_LIBS ${ALL_LIBS} "src/shader.cpp")
 set(ALL_LIBS ${ALL_LIBS} "src/stb_image.cpp")
+find_package(assimp REQUIRED)
 add_library(LIBS STATIC ${ALL_LIBS})
 link_libraries(LIBS)
-link_directories(${CMAKE_SOURCE_DIR}/lib)
 
+link_directories(${CMAKE_SOURCE_DIR}/lib)
 link_directories(/opt/homebrew/lib)
+
 set(CHAPTERS
     1.getting_started
     2.lighting

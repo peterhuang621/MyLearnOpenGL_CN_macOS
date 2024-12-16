@@ -59,6 +59,12 @@ class Mesh
 
         glActiveTexture(GL_TEXTURE0);
     };
+    // resetupmesh()
+
+    void ResetupMesh()
+    {
+        setupMesh();
+    };
 
   private:
     unsigned int VBO, EBO;

@@ -1,7 +1,7 @@
 #include "camera.h"
 #include "shader.h"
 #include "stb_image.h"
-#include <glfw/glfw3.h>
+#include <GLFW/glfw3.h>
 #include <iostream>
 
 const unsigned int SCR_WIDTH = 800;
