@@ -12,8 +12,11 @@ class Shader
 {
   public:
     unsigned int ID;
+    Shader(const char *vertexPath, const char *fragmentPath, const char *geomertryPath);
+    Shader(const string vertexPath, const string fragmentPath, const string geomertryPath);
     Shader(const char *vertexPath, const char *fragmentPath);
     Shader(const string vertexPath, const string fragmentPath);
+
     void use();
     void setBool(const string &name, bool value) const;
     void setInt(const string &name, int value) const;
