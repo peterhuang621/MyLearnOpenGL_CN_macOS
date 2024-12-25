@@ -57,6 +57,7 @@ int main(int argc, char const *argv[])
     glm::vec2 translation;
     int index = 0;
     float offset = 0.1f;
+    // Make it fun and practical to learn how the instances work!!
     for (int y = -10; y < 10; y += 2)
     {
         for (int x = -10; x < 10; x += 2)
@@ -67,16 +68,10 @@ int main(int argc, char const *argv[])
         }
     }
 
-    // Make it fun and practical to learn how the instances work!!
-    for (int i = 0; i < 100; i++)
-    {
-        translations[i + 100].x = translations[i].x + 0.1f;
-        translations[i + 100].y = translations[i].y + 0.05f;
-    }
     unsigned int instanceVBO;
     glGenBuffers(1, &instanceVBO);
     glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 200, &translations[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 100, &translations[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     unsigned int quadVAO, quadVBO;
@@ -92,9 +87,15 @@ int main(int argc, char const *argv[])
 
     glEnableVertexAttribArray(2);
     glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void *)0);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (void *)0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glVertexAttribDivisor(2, 1);
+
+    glEnableVertexAttribArray(3);
+    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (void *)(2 * 20 * sizeof(float)));
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glVertexAttribDivisor(3, 1);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -103,7 +104,7 @@ int main(int argc, char const *argv[])
 
         shader.use();
         glBindVertexArray(quadVAO);
-        glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 100);
+        glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 40);
         glBindVertexArray(0);
 
         glfwSwapBuffers(window);

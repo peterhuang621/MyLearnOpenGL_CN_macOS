@@ -14,3 +14,6 @@ add_executable(geometry_shader_houses geometry_shader_houses.cpp)
 add_executable(geometry_shader_exploding geometry_shader_exploding.cpp)
 add_executable(normal_visualization normal_visualization.cpp)
 add_executable(instancing_quads instancing_quads.cpp)
+add_executable(asteroids asteroids.cpp)
+
+# add_executable(asteroids_instanced asteroids_instanced.cpp)
