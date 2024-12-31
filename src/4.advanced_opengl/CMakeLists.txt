@@ -17,3 +17,4 @@ add_executable(instancing_quads instancing_quads.cpp)
 add_executable(asteroids asteroids.cpp)
 
 add_executable(asteroids_instanced asteroids_instanced.cpp)
+add_executable(anti_aliasing anti_aliasing.cpp)
