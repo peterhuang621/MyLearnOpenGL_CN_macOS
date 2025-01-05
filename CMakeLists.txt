@@ -46,8 +46,8 @@ set(CHAPTERS
     2.lighting
     3.model_loading
     4.advanced_opengl
+    5.advanced_lighting
 
-    # 5.advanced_lighting
     # 6.pbr
     # 7.in_practice
 )
