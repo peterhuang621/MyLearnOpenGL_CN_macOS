@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 project("MyLearnOpenGL")
 
-# APPLE flags
+# set flags
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
@@ -15,11 +15,14 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-# include headers
+# include project headers
 include_directories(${CMAKE_SOURCE_DIR}/includes)
-include_directories(/opt/homebrew/include)
 
-# for APPLE
+# *import essentials from homebrew
+include_directories(/opt/homebrew/include)
+link_directories(/opt/homebrew/lib)
+
+# *import from APPLE frameworks
 include_directories(/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks)
 FIND_LIBRARY(COCOA_LIBRARY Cocoa)
 FIND_LIBRARY(OpenGL_LIBRARY OpenGL)
@@ -29,17 +32,25 @@ MARK_AS_ADVANCED(COCOA_LIBRARY OpenGL_LIBRARY)
 SET(APPLE_LIBS ${COCOA_LIBRARY} ${IOKit_LIBRARY} ${OpenGL_LIBRARY} ${CoreVideo_LIBRARY})
 
 # SET(APPLE_LIBS ${APPLE_LIBS} ${GLFW3_LIBRARY} ${ASSIMP_LIBRARY} ${FREETYPE_LIBRARIES})
-set(ALL_LIBS ${ALL_LIBS} ${APPLE_LIBS})
 
-# load libs
-set(ALL_LIBS ${ALL_LIBS} "src/shader.cpp")
-set(ALL_LIBS ${ALL_LIBS} "src/stb_image.cpp")
-find_package(assimp REQUIRED)
-add_library(LIBS STATIC ${ALL_LIBS})
+# create and link all main libraries into LIBS
+set(ALL_LIBS ${ALL_LIBS} ${APPLE_LIBS} "src/shader.cpp" "src/stb_image.cpp")
+add_library(LIBS SHARED ${ALL_LIBS})
 link_libraries(LIBS)
 
-link_directories(${CMAKE_SOURCE_DIR}/lib)
-link_directories(/opt/homebrew/lib)
+# create ImGui library
+set(IMGUI_DIR "/Users/peterhuang98/imgui")
+include_directories(${IMGUI_DIR})
+set(IMGUI_SOURCES
+    ${IMGUI_DIR}/imgui.cpp
+    ${IMGUI_DIR}/imgui_draw.cpp
+    ${IMGUI_DIR}/imgui_widgets.cpp
+    ${IMGUI_DIR}/imgui_tables.cpp
+    ${IMGUI_DIR}/imgui_demo.cpp
+    ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
+    ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+)
+add_library(imgui SHARED ${IMGUI_SOURCES})
 
 set(CHAPTERS
     1.getting_started
