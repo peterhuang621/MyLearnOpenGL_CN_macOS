@@ -294,18 +294,6 @@ int main(int argc, char const *argv[])
     glm::mat4 shadowProj =
         glm::perspective(glm::radians(90.0f), (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT, near_plane, far_plane);
     vector<glm::mat4> shadowTransforms;
-    shadowTransforms.emplace_back(
-        shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-    shadowTransforms.emplace_back(
-        shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-    shadowTransforms.emplace_back(
-        shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
-    shadowTransforms.emplace_back(
-        shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
-    shadowTransforms.emplace_back(
-        shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-    shadowTransforms.emplace_back(
-        shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 
     while (!glfwWindowShouldClose(window))
     {
@@ -320,8 +308,24 @@ int main(int argc, char const *argv[])
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
-        glBindFramebuffer(GL_FRAMEBUFFER, depthCubemap);
+        // Serious confusion here! Pay attentions as lightPos is not constant as its z has changed!!!
+        shadowTransforms.clear();
+        shadowTransforms.emplace_back(
+            shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+        shadowTransforms.emplace_back(
+            shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+        shadowTransforms.emplace_back(
+            shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+        shadowTransforms.emplace_back(
+            shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
+        shadowTransforms.emplace_back(
+            shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+        shadowTransforms.emplace_back(
+            shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+
+        // SHADOW_W/H is different from SCR_W/H!!! Pay attentions!!!
+        glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
         glClear(GL_DEPTH_BUFFER_BIT);
         simpleDepthShader.use();
         for (unsigned i = 0; i < 6; i++)
