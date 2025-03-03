@@ -1,12 +1,12 @@
 #include "camera.h"
 #include "model.h"
 #include "shader.h"
+#include "stb_image.h"
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
-#include <stb_image.h>
 
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
@@ -48,13 +48,13 @@ void processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
     {
         if (exposure > 0.0f)
-            exposure -= 0.001f;
+            exposure -= 0.1f;
         else
             exposure = 0.0f;
     }
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
     {
-        exposure += 0.001f;
+        exposure += 0.1f;
     }
 }
 
@@ -253,8 +253,8 @@ int main(int argc, char const *argv[])
     glEnable(GL_DEPTH_TEST);
 
     Shader shader(addpath("6.lighting.vs"), addpath("6.lighting.fs"));
-    Shader hdrshader(addpath("6.hdr.vs"), addpath("6.hdr.fs"));
-    unsigned woodTexture = loadTexture("/Users/peterhuang98/test_code/C++/learn_opengl/resources/textures/wood.jpg");
+    Shader hdrShader(addpath("6.hdr.vs"), addpath("6.hdr.fs"));
+    unsigned woodTexture = loadTexture("/Users/peterhuang98/test_code/C++/learn_opengl/resources/textures/wood.png");
 
     unsigned hdrFBO;
     glGenFramebuffers(1, &hdrFBO);
@@ -262,13 +262,36 @@ int main(int argc, char const *argv[])
     unsigned colorBuffer;
     glGenTextures(1, &colorBuffer);
     glBindTexture(GL_TEXTURE_2D, colorBuffer);
-    // last editing
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    unsigned rboDepth;
+    glGenRenderbuffers(1, &rboDepth);
+    glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorBuffer, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        cout << "Framebuffer not complete!" << endl;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    vector<glm::vec3> lightPositions, lightColors;
+    lightPositions.emplace_back(glm::vec3(0.0f, 0.0f, 49.5f));
+    lightPositions.emplace_back(glm::vec3(-1.4f, -1.9f, 9.0f));
+    lightPositions.emplace_back(glm::vec3(0.0f, -1.8f, 4.0f));
+    lightPositions.emplace_back(glm::vec3(0.8f, -1.7f, 6.0f));
+    lightColors.emplace_back(glm::vec3(200.0f, 200.0f, 200.0f));
+    lightColors.emplace_back(glm::vec3(0.1f, 0.0f, 0.0f));
+    lightColors.emplace_back(glm::vec3(0.0f, 0.0f, 0.2f));
+    lightColors.emplace_back(glm::vec3(0.0f, 0.1f, 0.0f));
 
     shader.use();
-    shader.setInt("diffuseMap", 0);
-    shader.setInt("normalMap", 1);
-
-    glm::vec3 lightPos(0.5f, 1.0f, 0.3f);
+    shader.setInt("diffuseTexture", 0);
+    hdrShader.use();
+    hdrShader.setInt("hdrBuffer", 0);
 
     float currentFrame;
     glm::mat4 projection, view, model;
@@ -282,29 +305,41 @@ int main(int argc, char const *argv[])
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         view = camera.GetViewMatrix();
         shader.use();
         shader.setMat4("projection", projection);
         shader.setMat4("view", view);
-
-        model = glm::mat4(1.0f);
-        model = glm::rotate(model, glm::radians((float)glfwGetTime() * (-10.0f)),
-                            glm::normalize(glm::vec3(1.0f, 0.0, 1.0f)));
-        shader.setMat4("model", model);
-        shader.setVec3("viewPos", camera.Position);
-        shader.setVec3("lightPos", lightPos);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, diffuseMap);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, normalMap);
-        renderQuad();
+        glBindTexture(GL_TEXTURE_2D, woodTexture);
+
+        for (unsigned i = 0; i < lightPositions.size(); i++)
+        {
+            shader.setVec3("lights[" + to_string(i) + "].Position", lightPositions[i]);
+            shader.setVec3("lights[" + to_string(i) + "].Color", lightColors[i]);
+        }
+        shader.setVec3("viewPos", camera.Position);
 
         model = glm::mat4(1.0f);
-        model = glm::translate(model, lightPos);
-        model = glm::scale(model, glm::vec3(0.1f));
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 25.0));
+        model = glm::scale(model, glm::vec3(2.5f, 2.5f, 27.5f));
+
         shader.setMat4("model", model);
+        shader.setInt("inverse_normals", true);
+        renderCube();
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        hdrShader.use();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, colorBuffer);
+        hdrShader.setInt("hdr", hdr);
+        hdrShader.setFloat("exposure", exposure);
         renderQuad();
+
+        // cout << "hdr: " << (hdr ? "on" : "off") << "| exposure: " << exposure << endl;
 
         glfwSwapBuffers(window);
         glfwPollEvents();
