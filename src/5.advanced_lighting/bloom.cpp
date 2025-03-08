@@ -145,13 +145,13 @@ void processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
     {
         if (exposure > 0.0f)
-            exposure -= 0.001f;
+            exposure -= 0.1f;
         else
             exposure = 0.0f;
     }
     else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
     {
-        exposure += 0.001f;
+        exposure += 0.1f;
     }
 }
 
@@ -275,7 +275,7 @@ int main(int argc, char const *argv[])
     glGenFramebuffers(1, &hdrFBO);
     glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
     unsigned colorBuffers[2];
-    glGenBuffers(2, colorBuffers);
+    glGenTextures(2, colorBuffers);
     for (unsigned i = 0; i < 2; i++)
     {
         glBindTexture(GL_TEXTURE_2D, colorBuffers[i]);
@@ -291,6 +291,7 @@ int main(int argc, char const *argv[])
 
     unsigned rboDepth;
     glGenRenderbuffers(1, &rboDepth);
+    glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
 
@@ -346,6 +347,7 @@ int main(int argc, char const *argv[])
         lastFrame = currentFrame;
 
         processInput(window);
+
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -363,10 +365,10 @@ int main(int argc, char const *argv[])
 
         for (unsigned i = 0; i < lightPositions.size(); i++)
         {
-            shader.setVec3("light[" + to_string(i) + "].Position", lightPositions[i]);
-            shader.setVec3("light[" + to_string(i) + "].Color", lightPositions[i]);
+            shader.setVec3("lights[" + to_string(i) + "].Position", lightPositions[i]);
+            shader.setVec3("lights[" + to_string(i) + "].Color", lightColors[i]);
         }
-        shader.setVec3("viewpos", camera.Position);
+        shader.setVec3("viewPos", camera.Position);
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
         model = glm::scale(model, glm::vec3(12.5f, 0.5f, 12.5f));
@@ -433,6 +435,7 @@ int main(int argc, char const *argv[])
         {
             glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);
             shaderBlur.setInt("horizontal", horizontal);
+            glBindTexture(GL_TEXTURE_2D, first_iteration ? colorBuffers[1] : pingpongColorbuffers[!horizontal]);
             renderQuad();
             horizontal = !horizontal;
             if (first_iteration)
