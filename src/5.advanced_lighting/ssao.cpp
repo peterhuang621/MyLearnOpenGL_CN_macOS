@@ -7,6 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
+#include <random>
 
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
@@ -274,6 +275,133 @@ int main()
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         cout << "SSAO Blur Framebuffer not complete!" << endl;
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    uniform_real_distribution<GLfloat> randomFloats(0.0, 1.0);
+    default_random_engine generator;
+    vector<glm::vec3> ssaoKernel;
+    for (unsigned int i = 0; i < 64; ++i)
+    {
+        glm::vec3 sample(randomFloats(generator) * 2.0 - 1.0, randomFloats(generator) * 2.0 - 1.0,
+                         randomFloats(generator));
+        sample = glm::normalize(sample);
+        sample *= randomFloats(generator);
+        float scale = float(i) / 64.0f;
+        scale = ourLerp(0.1f, 1.0f, scale * scale);
+        ssaoKernel.emplace_back(sample);
+    }
+
+    vector<glm::vec3> ssaoNoise;
+    for (unsigned int i = 0; i < 16; ++i)
+    {
+        glm::vec3 noise(randomFloats(generator) * 2.0 - 1.0, randomFloats(generator) * 2.0 - 1.0, 0.0f);
+        ssaoNoise.emplace_back(noise);
+    }
+    unsigned noiseTexture;
+    glGenTextures(1, &noiseTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 4, 4, 0, GL_RGB, GL_FLOAT, &ssaoNoise[0]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glm::vec3 lightPos = glm::vec3(2.0, 4.0, -2.0);
+    glm::vec3 lightColor = glm::vec3(0.2, 0.2, 0.7);
+
+    shaderLightingPass.use();
+    shaderLightingPass.setInt("gPosition", 0);
+    shaderLightingPass.setInt("gNormal", 1);
+    shaderLightingPass.setInt("gAlbedo", 2);
+    shaderLightingPass.setInt("ssao", 3);
+    shaderSSAO.use();
+    shaderSSAO.setInt("gPosition", 0);
+    shaderSSAO.setInt("gNormal", 1);
+    shaderSSAO.setInt("texNoise", 2);
+    shaderSSAOBlur.use();
+    shaderSSAOBlur.setInt("ssaoInput", 0);
+
+    float currentFrame;
+    while (!glfwWindowShouldClose(window))
+    {
+        currentFrame = static_cast<float>(glfwGetTime());
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
+        processInput(window);
+
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glm::mat4 projection =
+            glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 50.0f);
+        glm::mat4 view = camera.GetViewMatrix();
+        glm::mat4 model = glm::mat4(1.0f);
+        shaderGeometryPass.use();
+        shaderGeometryPass.setMat4("projection", projection);
+        shaderGeometryPass.setMat4("view", view);
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0, 7.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(7.5f, 7.5f, 7.5f));
+        shaderGeometryPass.setMat4("model", model);
+        shaderGeometryPass.setInt("invertedNormals", 1);
+        renderCube();
+        shaderGeometryPass.setInt("invertedNormals", 0);
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0));
+        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
+        model = glm::scale(model, glm::vec3(1.0f));
+        shaderGeometryPass.setMat4("model", model);
+        backpack.Draw(shaderGeometryPass);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, ssaoFBO);
+        glClear(GL_COLOR_BUFFER_BIT);
+        shaderSSAO.use();
+        for (unsigned int i = 0; i < 64; i++)
+            shaderSSAO.setVec3("samples[" + to_string(i) + "]", ssaoKernel[i]);
+        shaderSSAO.setMat4("projection", projection);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, gPosition);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, gNormal);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, noiseTexture);
+        renderQuad();
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, ssaoBlurFBO);
+        glClear(GL_COLOR_BUFFER_BIT);
+        shaderSSAOBlur.use();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, ssaoColorBuffer);
+        renderQuad();
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        shaderLightingPass.use();
+        glm::vec3 lightPosView = glm::vec3(camera.GetViewMatrix() * glm::vec4(lightPos, 1.0));
+        shaderGeometryPass.setVec3("light.Position", lightPosView);
+        shaderLightingPass.setVec3("light.Color", lightColor);
+        const float linear = 0.09f;
+        const float quadratic = 0.032f;
+        shaderLightingPass.setFloat("light.Linear", linear);
+        shaderLightingPass.setFloat("light.Quadratic", quadratic);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, gPosition);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, gNormal);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, gAlbedo);
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, ssaoColorBufferBlur);
+        renderQuad();
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
 
     glfwTerminate();
 }
